@@ -7,6 +7,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(length=128), nullable=False, unique=True, index=True)
+    hashed_password = Column(String, nullable=False)
 
     def __repr__(self) -> str:
         return f'User(id={self.id}, username={self.username})'
