@@ -1,3 +1,4 @@
+import jwt
 from passlib.context import CryptContext
 from config import config
 
@@ -11,3 +12,9 @@ def hash_password(plain_password: str):
 def verify_password(password, hashed_password):
     password = f"{password}:{config.SECRET_KEY}"
     return pwd_context.verify(password, hashed_password)
+
+def generate_token(data: dict):
+    to_encode = data.copy()
+    encoded = jwt.encode(to_encode, config.SECRET_KEY, algorithm="HS256")
+    return encoded
+

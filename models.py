@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean
+from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey
 from db import Base
 
 
@@ -20,6 +20,7 @@ class Task(Base):
     name = Column(String(length=128), nullable=False, index=True)
     description = Column(Text, default='')
     status = Column(Boolean, default=False, nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
     def __repr__(self) -> str:
         return f'Task(id={self.id}, name={self.name})'

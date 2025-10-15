@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class UserOut(BaseModel):
@@ -8,3 +8,9 @@ class UserOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class TaskCreate(BaseModel):
+    name: str = Field(max_length=128)
+    description: str | None = Field(None)
+    
