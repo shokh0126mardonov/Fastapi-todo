@@ -1,5 +1,6 @@
 import jwt
 from passlib.context import CryptContext
+from fastapi import HTTPException
 from config import config
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -18,3 +19,9 @@ def generate_token(data: dict):
     encoded = jwt.encode(to_encode, config.SECRET_KEY, algorithm="HS256")
     return encoded
 
+def verify_token(token: str):
+    try:
+        data = jwt.decode(token, config.SECRET_KEY, algorithms="HS256")
+        return data
+    except:
+        raise HTTPException(status_code=400, detail="invalid token")

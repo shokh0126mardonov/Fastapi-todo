@@ -2,10 +2,11 @@ from typing import Annotated
 from fastapi.routing import APIRouter
 from fastapi import Form, HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
-from auth import hash_password, verify_password, generate_token
+from sqlalchemy.orm import Session
+from auth import hash_password, verify_password, generate_token, verify_token
 from db import LocalSession
 from models import User, Task
-from schemas import UserOut, TaskCreate
+from schemas import UserOut, TaskCreate, TaskOut
 from deps import get_db
 
 router = APIRouter()
@@ -50,36 +51,36 @@ def login(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="incorrect password.")
     
     data = {
-        "sub": existing_user.id,
+        "sub": existing_user.username,
     }
     token = generate_token(data)
     
     return {'token': token}
 
 
-@router.post('/tasks')
+@router.post('/tasks', response_model=TaskOut)
 def add_task(
     task: TaskCreate,
     token: Annotated[str, Depends(oauth2_scheme)],
-    # session = Depends(get_db)
+    session: Annotated[Session, Depends(get_db)]
 ):
-    print(token)
-    print(task)
-
-    # user = session.query(User).filter_by(id=task.user_id).first()
-    # if not user:
-    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="user not found.")
-
-    # # check name
-    # existing_task = session.query(Task).filter(Task.user_id==task.user_id, Task.name==task.name).first()
-    # if existing_task:
-    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="task already exists.")
+    data = verify_token(token)
     
-    # task = Task(name=task.name, description=task.description, user_id=task.user_id)
+    sub = data['sub']
 
-    # session.add(task)
-    # session.commit()
-    # session.refresh(task)
+    user = session.query(User).filter_by(username=sub).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="user not found.")
 
-    # # return task
+    existing_task = session.query(Task).filter(Task.user_id==user.id, Task.name==task.name).first()
+    if existing_task:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="task already exists.")
+    
+    task = Task(name=task.name, description=task.description, user_id=user.id)
+
+    session.add(task)
+    session.commit()
+    session.refresh(task)
+
+    return task
     
