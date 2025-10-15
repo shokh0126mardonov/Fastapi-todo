@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Literal
 from fastapi.routing import APIRouter
 from fastapi import Form, HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
@@ -83,4 +83,24 @@ def add_task(
     session.refresh(task)
 
     return task
+
+@router.patch('/tasks/{task_id}', response_model=TaskOut)
+def update_status(
+    task_id: int,
+    token: Annotated[str, Depends(oauth2_scheme)],
+    session: Annotated[Session, Depends(get_db)]
+):
+    data = verify_token(token)
+    user = session.query(User).filter_by(username=data['sub']).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="user not found.")
     
+    task = session.query(Task).filter(Task.id==task_id, Task.user_id==user.id).first()
+    if not task:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="task not found.")
+    
+    task.status = not task.status
+    session.add(task)
+    session.commit()
+
+    return task
