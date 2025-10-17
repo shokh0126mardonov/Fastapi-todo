@@ -10,7 +10,7 @@ from deps import get_db
 
 router = APIRouter()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
 @router.get('/')
 def home():
@@ -35,7 +35,7 @@ def regsiter(
     return user
 
 
-@router.get('/users')
+@router.post('/users/login')
 def login(
     username: str = Form(min_length=5, max_length=128),
     password: str = Form(min_length=8),
@@ -54,7 +54,7 @@ def login(
     }
     token = generate_token(data)
     
-    return {'token': token}
+    return {'token': 654645}
 
 
 @router.post('/tasks')
