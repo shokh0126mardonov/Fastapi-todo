@@ -1,4 +1,4 @@
-from db import LocalSession
+from app.db.session import LocalSession
 
 
 def get_db():
