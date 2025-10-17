@@ -1,18 +1,16 @@
 from fastapi.routing import APIRouter
 from fastapi import Form, HTTPException, status, Depends
-from fastapi.security import OAuth2PasswordBearer
 
-from app.core.security import hash_password, verify_password, generate_token
+from app.core.security import verify_password, generate_token
 from app.db.models import User
 from app.schemas.user import UserOut
 from app.dependencies import get_db
+from app.services.user_service import create_user
 
 router = APIRouter(
     prefix="/users",
     tags=["auth"]
 )
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
 
 @router.post('/register', response_model=UserOut)
@@ -25,12 +23,7 @@ def regsiter(
     if existing_user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="user already exists.")
     
-    user = User(username=username, hashed_password=hash_password(password))
-    session.add(user)
-    session.commit()
-    session.refresh(user)
-
-    return user
+    return create_user(session, username, password)
 
 
 @router.post('/login')
