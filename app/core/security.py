@@ -1,7 +1,8 @@
 import jwt
 from passlib.context import CryptContext
 from fastapi import HTTPException
-from config import config
+
+from app.core.config import config
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

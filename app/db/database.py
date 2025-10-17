@@ -1,8 +1,7 @@
 from sqlalchemy import create_engine, URL
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-from config import config
+from app.core.config import config
 
 
 BATABASE_URL = URL.create(
@@ -16,4 +15,3 @@ BATABASE_URL = URL.create(
 
 engine = create_engine(url=BATABASE_URL)
 Base = declarative_base()
-LocalSession = sessionmaker(bind=engine)
