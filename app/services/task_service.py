@@ -19,7 +19,7 @@ def create_task(session: Session, user: User, task_data: TaskCreate) -> Task:
 
     return task
 
-def update_task_status(session: Session, user: User, task_id: int):
+def update_task_status(session: Session, user: User, task_id: int) -> Task:
     task = session.query(Task).filter(Task.id==task_id, Task.user_id==user.id).first()
     if not task:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Task not found.")
@@ -29,3 +29,11 @@ def update_task_status(session: Session, user: User, task_id: int):
     session.commit()
 
     return task
+
+def delete_task(session: Session, user: User, task_id: int):
+    task = session.query(Task).filter(Task.id==task_id, Task.user_id==user.id).first()
+    if not task:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Task not found.")
+    
+    session.delete(task)
+    session.commit()
